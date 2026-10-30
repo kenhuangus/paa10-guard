@@ -1,0 +1,50 @@
+# Crosswalk: Agentic Skills Top 10 and MCP Top 10
+
+The [OWASP Agentic Skills Top 10](https://owasp.github.io/www-project-agentic-skills-top-10/) (AST, v1.0 2026) covers the skills and plug-ins an agent loads. The [OWASP MCP Top 10](https://owasp.org/projects/mcp-top-10) (2025, beta) covers the MCP servers and tools it connects to. Both describe the components a personal agent is built from. PAA10 describes the harm to the person when those components fail, and this guard enforces the PAA10 controls at the action boundary.
+
+This page uses the same PAA mapping as the [PAA10 crosswalk](https://github.com/kenhuangus/owasp-top-10-for-personal-ai-agents/blob/main/docs/crosswalk.md) and adds, for every AST and MCP item, the guard rules that address it and how far they reach. It is an analytical mapping, not equivalence or certification. Machine-readable: [`crosswalk/crosswalk.json`](../crosswalk/crosswalk.json).
+
+Coverage levels:
+
+- **Enforced**: the guard blocks or holds the consequential action wherever actions pass through it (proxy, hook, or `/v1/check`).
+- **Partial**: the guard bounds the harm but does not address the root cause the item names, so pair it with the control the item recommends.
+- **Out of scope**: needs a control the guard does not provide.
+
+The pattern is consistent: the guard does not decide whether a skill or server is trustworthy. It limits what any skill or server, trusted or not, can make the agent do to its owner.
+
+## Agentic Skills Top 10 (4 enforced, 6 partial)
+
+| Item | PAA entries | Guard rules | Coverage | Notes |
+|---|---|---|---|---|
+| AST01 Malicious Skills | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover), [PAA05](mapping.md#paa05-counterparty-deception-and-agent-mediated-scams), [PAA09](mapping.md#paa09-manipulation-of-personal-choice) | `PAA02.credential_exfiltration`, `PAA02.secret_egress`, `PAA05.untrusted_instruction`, `PAA09.undisclosed_incentive`, `PAA10.stopped` | Partial | Bounds what an installed malicious skill can do; does not detect that a skill is malicious. |
+| AST02 Supply Chain Compromise | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover) | `PAA02.unpinned_connector`, `PAA02.connector_changed` | Partial | Detects a change from the pinned version hash; does not vet registries or publishers. |
+| AST03 Over-Privileged Skills | [PAA01](mapping.md#paa01-personal-mandate-drift), [PAA03](mapping.md#paa03-private-life-context-exposure), [PAA06](mapping.md#paa06-unauthorized-spending-and-personal-commitments), [PAA07](mapping.md#paa07-unauthorized-social-representation), [PAA08](mapping.md#paa08-household-and-bystander-consent-violations) | `PAA01.outside_scope`, `PAA01.outside_resources`, `PAA01.no_mandate`, `PAA06.per_action_cap`, `PAA03.context_crossing`, `PAA08.no_subject_consent` | Enforced | Privilege is bounded per action by the owner's mandate, whatever the skill requests at install time. |
+| AST04 Insecure Metadata | [PAA05](mapping.md#paa05-counterparty-deception-and-agent-mediated-scams) | `PAA05.lookalike_merchant`, `PAA01.no_mandate` | Partial | Unrecognized tool names are classified as modify, never read, and explicit tool maps override names. Skill manifests are not parsed. |
+| AST05 Untrusted External Instructions | [PAA03](mapping.md#paa03-private-life-context-exposure), [PAA04](mapping.md#paa04-personal-memory-and-preference-corruption), [PAA05](mapping.md#paa05-counterparty-deception-and-agent-mediated-scams), [PAA09](mapping.md#paa09-manipulation-of-personal-choice) | `PAA01.untrusted_trigger`, `PAA04.untrusted_authority`, `PAA04.untrusted_fact`, `PAA05.untrusted_instruction`, `PAA02.recovery_change_from_untrusted` | Enforced | Content from untrusted sources cannot trigger consequential actions or become trusted memory. |
+| AST06 Weak Isolation | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover), [PAA10](mapping.md#paa10-loss-of-personal-control-and-continuity) | `PAA02.credential_exfiltration`, `PAA06.irreversible` | Partial | Enforcement sits outside the model and owner tokens are kept from the agent, but the guard is not a sandbox; run skills in one. |
+| AST07 Update Drift | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover) | `PAA02.connector_changed`, `PAA02.unpinned_connector` | Enforced | With pin_connectors on, a changed or unpinned connector is held until the owner re-pins it. |
+| AST08 Poor Scanning | [PAA04](mapping.md#paa04-personal-memory-and-preference-corruption) | `PAA04.untrusted_fact`, `PAA01.no_mandate` | Partial | The guard's own detectors are keyword and regex based and share this weakness; deny-by-default for unknown consequential tools compensates. |
+| AST09 No Governance | [PAA01](mapping.md#paa01-personal-mandate-drift), [PAA07](mapping.md#paa07-unauthorized-social-representation), [PAA10](mapping.md#paa10-loss-of-personal-control-and-continuity) | `PAA01.no_mandate`, `PAA06.bound_approval`, `PAA10.owner_only_step`, `PAA10.stopped` | Enforced | Mandate inventory, owner-only approvals and a hash-chained audit log for actions. No inventory of installed skills. |
+| AST10 Cross-Platform Reuse | [PAA10](mapping.md#paa10-loss-of-personal-control-and-continuity) | audit log and platform guides | Partial | One policy and rule packs for Muse, Grok Bot, Dots and Claude, with each platform guide stating what is enforced versus advisory. Skill metadata is not translated. |
+
+## MCP Top 10 (4 enforced, 6 partial)
+
+| Item | PAA entries | Guard rules | Coverage | Notes |
+|---|---|---|---|---|
+| MCP01 Token Mismanagement and Secret Exposure | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover) | `PAA02.secret_egress`, `PAA02.credential_exfiltration` | Enforced | Blocks secrets in outbound content; separate agent and owner bearer tokens on the HTTP service. Does not manage the downstream server's own tokens. |
+| MCP02 Privilege Escalation via Scope Creep | [PAA01](mapping.md#paa01-personal-mandate-drift), [PAA06](mapping.md#paa06-unauthorized-spending-and-personal-commitments), [PAA07](mapping.md#paa07-unauthorized-social-representation) | `PAA01.outside_scope`, `PAA01.outside_resources`, `PAA01.delegation_depth`, `PAA01.expired` | Enforced | Child mandates can only narrow; withdrawal cascades. |
+| MCP03 Tool Poisoning | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover), [PAA05](mapping.md#paa05-counterparty-deception-and-agent-mediated-scams), [PAA09](mapping.md#paa09-manipulation-of-personal-choice) | `PAA02.connector_changed`, `PAA05.untrusted_instruction`, `PAA04.untrusted_authority`, `PAA09.criteria_override` | Partial | Checks the resulting action, not tool descriptions or outputs; pinning catches changed tools. |
+| MCP04 Software Supply Chain Attacks and Dependency Tampering | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover) | `PAA02.connector_changed`, `PAA02.unpinned_connector` | Partial | The guard itself uses only the Python standard library. Downstream server dependencies are not scanned. |
+| MCP05 Command Injection and Execution | [PAA02](mapping.md#paa02-personal-account-and-recovery-takeover) | `PAA06.irreversible`, `PAA02.credential_exfiltration` | Partial | Destructive and exfiltrating commands are caught in the hook; input sanitization inside the server is out of scope. |
+| MCP06 Prompt Injection via Contextual Payloads | [PAA03](mapping.md#paa03-private-life-context-exposure), [PAA04](mapping.md#paa04-personal-memory-and-preference-corruption), [PAA05](mapping.md#paa05-counterparty-deception-and-agent-mediated-scams), [PAA09](mapping.md#paa09-manipulation-of-personal-choice) | `PAA01.untrusted_trigger`, `PAA04.untrusted_authority`, `PAA05.untrusted_instruction`, `PAA02.secret_egress` | Partial | Does not detect the injection; limits what an injected instruction can make the agent do. |
+| MCP07 Insufficient Authentication and Authorization | [PAA01](mapping.md#paa01-personal-mandate-drift), [PAA06](mapping.md#paa06-unauthorized-spending-and-personal-commitments), [PAA07](mapping.md#paa07-unauthorized-social-representation) | `PAA01.no_mandate`, `PAA06.bound_approval`, `PAA06.approval_used` | Enforced | Per-action authorization; approvals are owner-only, bound to exact terms and single use. The agent has no approve tool. |
+| MCP08 Lack of Audit and Telemetry | [PAA10](mapping.md#paa10-loss-of-personal-control-and-continuity) | audit log and platform guides | Enforced | Every decision is written with its rule ids to a hash-chained audit log (paa-guard audit verify, paa-guard export). |
+| MCP09 Shadow MCP Servers | [PAA10](mapping.md#paa10-loss-of-personal-control-and-continuity) | `PAA02.unpinned_connector` | Partial | With pinning on, unknown connectors are held. Servers the agent reaches without passing through the guard are invisible to it. |
+| MCP10 Context Injection and Over-Sharing | [PAA03](mapping.md#paa03-private-life-context-exposure), [PAA04](mapping.md#paa04-personal-memory-and-preference-corruption), [PAA08](mapping.md#paa08-household-and-bystander-consent-violations) | `PAA03.context_crossing`, `PAA03.sensitive_disclosure`, `PAA03.inference_disclosure`, `PAA04.untrusted_fact`, `PAA08.no_subject_consent` | Partial | Checks outbound actions for context crossing and quarantines untrusted memory writes; does not partition the model's context window. |
+
+## What to pair the guard with
+
+- **Skill and server vetting** (AST01, AST02, AST08, MCP03, MCP04): scan and review before install, use signed sources, and turn on `pin_connectors` so later changes are held.
+- **Sandboxing** (AST06, MCP05): run skills and local servers with least file, network and shell access. The guard checks actions; it does not contain processes.
+- **Routing every server through the guard** (MCP09): put each stdio server behind `paa-guard proxy`, and have hosted agents call `/v1/check`. A server reached directly is invisible to the guard.
+- **Explicit tool maps** (AST04): name the recipient, amount and merchant arguments in a tool map rather than relying on tool names.

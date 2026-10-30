@@ -1,5 +1,7 @@
 **Top 10: https://kenhuangus.github.io/owasp-top-10-for-personal-ai-agents/**
 
+**Crosswalk: [Agentic Skills Top 10 and MCP Top 10](docs/crosswalk.md)**
+
 # paa10-guard
 
 A reference mitigation for the [OWASP Top 10 for Personal AI Agents (PAA10)](https://github.com/kenhuangus/owasp-top-10-for-personal-ai-agents). It is a small, dependency-free policy guard that checks each action a personal agent proposes, outside the model, and answers **allow**, **require_approval**, or **deny**. It ships as a Python package, a CLI, an MCP server, a gating MCP proxy, a Claude plugin (skill, hook, MCP), and rule packs for Meta Muse, Grok Bot, OpenAI Dots and Anthropic Claude Duet.
@@ -26,6 +28,17 @@ Every PAA10 entry asks providers to enforce limits at the permission or executio
 | PAA10 Control | Owner kill switch for all agents, one agent, or its children, which cancels outstanding approvals; loop breaker; hash-chained audit log; export |
 
 [docs/mapping.md](docs/mapping.md) maps every provider requirement in the Top 10 to a guard rule and a test.
+
+## Crosswalk to the Agentic Skills Top 10 and MCP Top 10
+
+Personal agents are assembled from skills and MCP servers, so the guard is also mapped to the [OWASP Agentic Skills Top 10](https://owasp.github.io/www-project-agentic-skills-top-10/) and the [OWASP MCP Top 10](https://owasp.org/projects/mcp-top-10). [docs/crosswalk.md](docs/crosswalk.md) lists, for each AST and MCP item, the PAA entries it leads to, the guard rules that address it, and whether coverage is enforced or partial.
+
+| | Enforced | Partial |
+|---|---|---|
+| Agentic Skills Top 10 | AST03, AST05, AST07, AST09 | AST01, AST02, AST04, AST06, AST08, AST10 |
+| MCP Top 10 | MCP01, MCP02, MCP07, MCP08 | MCP03, MCP04, MCP05, MCP06, MCP09, MCP10 |
+
+The guard does not judge whether a skill or server is trustworthy; it limits what any of them can make the agent do to its owner. Pair it with skill and server vetting, sandboxing, and routing every server through the proxy.
 
 ## Quick start
 
@@ -86,7 +99,7 @@ The proxy and hook map tool calls to PAA actions. Unknown tools are classified f
 python -m unittest discover -s tests -v
 ```
 
-The suite has 53 tests: one or more scenarios per entry (most taken from the documented cases in the Top 10), plus integration tests for the CLI, the MCP server, the proxy, the hook adapter, and HTTP token separation. CI runs it on Linux, Windows and macOS.
+The suite has 55 tests: one or more scenarios per entry (most taken from the documented cases in the Top 10), integration tests for the CLI, the MCP server, the proxy, the hook adapter, and HTTP token separation, and checks that the crosswalk is complete and cites only real rules. CI runs it on Linux, Windows and macOS.
 
 ## Limits
 
