@@ -1,0 +1,14 @@
+{
+  "name": "paa10-guard",
+  "owner": {
+    "name": "Ken Huang",
+    "url": "https://github.com/kenhuangus"
+  },
+  "plugins": [
+    {
+      "name": "paa10-guard",
+      "source": "./",
+      "description": "Reference mitigations for the OWASP Top 10 for Personal AI Agents (PAA10)."
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "spending": {"currency": "USD", "per_action_max": 150, "daily_max": 300, "monthly_max": 1200, "approval_threshold": 25},
+  "verified_merchants": ["amazon.com", "instacart.com", "target.com", "costco.com"],
+  "account_domains": ["google.com", "accounts.google.com", "chase.com", "apple.com"],
+  "messaging": {"max_recipients_without_approval": 2},
+  "persuasion": {"refusal_cooldown_hours": 168},
+  "pin_connectors": true
+}

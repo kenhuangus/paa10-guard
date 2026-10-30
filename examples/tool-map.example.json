@@ -1,0 +1,23 @@
+{
+  "tools": {
+    "gmail_send_email": {
+      "class": "send",
+      "fields": {"recipients": "to", "content.text": "body", "context.target_context": "=private"}
+    },
+    "outlook_send_mail": {
+      "class": "send",
+      "fields": {"recipients": "message.toRecipients", "content.text": "message.body.content", "context.target_context": "=work"}
+    },
+    "shop_checkout": {
+      "class": "purchase",
+      "fields": {"payment.amount": "total", "payment.currency": "currency", "payment.merchant_domain": "site",
+                 "payment.recurring": "subscription", "payment.idempotency_key": "order_id"}
+    },
+    "bank_pay_bill": {
+      "class": "payment",
+      "fields": {"payment.payee": "payee_name", "payment.payee_account": "account_number", "payment.amount": "amount",
+                 "payment.currency": "=USD"}
+    },
+    "extract_text": {"class": "read"}
+  }
+}

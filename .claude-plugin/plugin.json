@@ -1,0 +1,13 @@
+{
+  "name": "paa10-guard",
+  "version": "0.1.0",
+  "description": "Reference guard for the OWASP Top 10 for Personal AI Agents: mandates, approvals bound to exact terms, secret egress blocking, payee and merchant verification, spending caps, consent checks, refusal memory, and an owner kill switch.",
+  "author": {
+    "name": "Ken Huang",
+    "url": "https://github.com/kenhuangus"
+  },
+  "homepage": "https://kenhuangus.github.io/owasp-top-10-for-personal-ai-agents/",
+  "repository": "https://github.com/kenhuangus/paa10-guard",
+  "license": "Apache-2.0",
+  "keywords": ["security", "owasp", "personal-agents", "guardrails", "hooks", "mcp"]
+}

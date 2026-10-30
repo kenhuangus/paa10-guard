@@ -1,0 +1,17 @@
+{
+  "description": "PAA10 guard: checks every tool call before it runs. Deny blocks; require_approval asks the owner.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/paa-guard.py\" hook claude-code",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

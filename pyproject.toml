@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paa10-guard"
+version = "0.1.0"
+description = "Reference guard for the OWASP Top 10 for Personal AI Agents (PAA10)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [{name = "Ken Huang"}]
+requires-python = ">=3.9"
+dependencies = []
+classifiers = ["Programming Language :: Python :: 3", "Topic :: Security"]
+
+[project.urls]
+Homepage = "https://kenhuangus.github.io/owasp-top-10-for-personal-ai-agents/"
+Source = "https://github.com/kenhuangus/paa10-guard"
+
+[project.scripts]
+paa-guard = "paa_guard.cli:main"
+
+[tool.setuptools]
+packages = ["paa_guard"]
